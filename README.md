@@ -1,15 +1,15 @@
-# template-kha
+# ray-khasting
 
 Template for [Kha](http://kha.tech/) games.
 
-https://gamedevplayground.github.io/template-kha/
+https://gamedevplayground.github.io/ray-khasting/
 
 ## How to run
 
 * Clone this repository:
 
 ```
-git clone --recursive https://github.com/gamedevplayground/template-kha.git
+git clone --recursive https://github.com/gamedevplayground/ray-khasting.git
 ```
 
 * Install [Node.js](https://nodejs.org/) (minimum version: 8.9) and add it to PATH

@@ -1,4 +1,4 @@
-let project = new Project('template-kha');
+let project = new Project('ray-khasting');
 // LDtk
 project.addLibrary('deepnightLibs');
 project.addLibrary('ldtk-haxe-api');
