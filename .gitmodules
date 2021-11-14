@@ -1,0 +1,9 @@
+[submodule "Kha"]
+	path = Kha
+	url = https://github.com/Kode/Kha
+[submodule "Libraries/deepnightLibs"]
+	path = Libraries/deepnightLibs
+	url = https://github.com/deepnight/deepnightLibs
+[submodule "Libraries/ldtk-haxe-api"]
+	path = Libraries/ldtk-haxe-api
+	url = https://github.com/deepnight/ldtk-haxe-api

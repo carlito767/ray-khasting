@@ -1,0 +1,8 @@
+# MacOS
+.DS_Store
+
+# Kha
+/Kha
+/Libraries
+/build
+/korefile.js
