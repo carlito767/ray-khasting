@@ -31,6 +31,7 @@ class Game {
   // Renderers
   var renderer2DMap:Renderer2DMap;
   var rendererRayCastingFlat:RendererRayCastingFlat;
+  var rendererRayCastingTextured:RendererRayCastingTextured;
 
   // Commands
   var up:Bool;
@@ -41,6 +42,7 @@ class Game {
   var toNextLevel:Bool;
 
   var showMap:Bool;
+  var showTextures:Bool;
 
   // World
   var world:World;
@@ -58,6 +60,9 @@ class Game {
     // Initialize renderers
     renderer2DMap = new Renderer2DMap();
     rendererRayCastingFlat = new RendererRayCastingFlat();
+    rendererRayCastingTextured = new RendererRayCastingTextured();
+
+    showTextures = true;
 
     // Initialize keyboard
     var keyboard = Keyboard.get();
@@ -107,6 +112,7 @@ class Game {
       case Right: right = true;
       case L: toNextLevel = true;
       case M: showMap = !showMap;
+      case T: showTextures = !showTextures;
       default:
     }
   }
@@ -182,6 +188,9 @@ class Game {
     // Render level
     if (showMap) {
       renderer2DMap.render(frame, this);
+    }
+    else if (showTextures) {
+      rendererRayCastingTextured.render(frame, this);
     }
     else {
       rendererRayCastingFlat.render(frame, this);

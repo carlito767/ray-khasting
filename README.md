@@ -30,3 +30,4 @@ node Kha/make --server
 ## Credits
 * [Lode](https://lodev.org/) for the [ray-casting tutorial](https://lodev.org/cgtutor/raycasting.html).
 * [Sébastien "deepnight" Bénard](https://deepnight.net/) for [LDtk](https://ldtk.io).
+* [KronBits](https://kronbits.itch.io/) for the [Inca assets](https://kronbits.itch.io/inca-game-assets).
