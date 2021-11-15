@@ -28,6 +28,9 @@ class Game {
   public var planeX:Float;
   public var planeY:Float;
 
+  // Sprites
+  public var sprites:Array<Sprite>;
+
   // Renderers
   var renderer2DMap:Renderer2DMap;
   var rendererRayCastingFlat:RendererRayCastingFlat;
@@ -93,6 +96,15 @@ class Game {
     // Camera
     planeX = 0.0;
     planeY = 0.66;
+    // Sprites
+    sprites = [];
+    for (maki in level.l_Entities.all_Maki) {
+      sprites.push({
+        x:maki.cy + maki.pivotY,
+        y:maki.cx + maki.pivotX,
+        tex:maki.f_tex,
+      });
+    }
   }
 
   function loadNextLevel():Void {

@@ -3,12 +3,23 @@ import kha.Assets;
 import kha.Color;
 import kha.Framebuffer;
 
+typedef ZBuffer = Vector<Float>;
+
+typedef ZSprite = {
+  index:Int,
+  distance:Float,
+}
+
 class RendererRayCastingTextured {
   static inline var TEXWIDTH = 32;
   static inline var TEXHEIGHT = 32;
 
+  static inline var SPRWIDTH = 16;
+  static inline var SPRHEIGHT = 16;
+
   // Textures
   var walls:Vector<Tile>;
+  var sprites:Vector<Tile>;
 
   public function new() {
     var tileset = Assets.images.inca;
@@ -21,11 +32,19 @@ class RendererRayCastingTextured {
     walls[5] = new Tile(tileset, 0 * TEXWIDTH, 1 * TEXHEIGHT, TEXWIDTH, TEXHEIGHT);
     walls[6] = new Tile(tileset, 1 * TEXWIDTH, 1 * TEXHEIGHT, TEXWIDTH, TEXHEIGHT);
     walls[7] = new Tile(tileset, 2 * TEXWIDTH, 1 * TEXHEIGHT, TEXWIDTH, TEXHEIGHT);
+
+    tileset = Assets.images.food;
+    sprites = new Vector(2);
+    sprites[0] = new Tile(tileset, 6 * SPRWIDTH, 0 * SPRHEIGHT, SPRWIDTH, SPRHEIGHT); // Maki 1
+    sprites[1] = new Tile(tileset, 7 * SPRWIDTH, 0 * SPRHEIGHT, SPRWIDTH, SPRHEIGHT); // Maki 2
   }
 
   public function render(frame:Framebuffer, game:Game):Void {
     renderCeilingAndFloor(frame, game);
-    renderWalls(frame, game);
+    var zBuffer = renderWalls(frame, game);
+    if (game.sprites.length > 0) {
+      renderSprites(frame, game, zBuffer);
+    }
   }
 
   function renderCeilingAndFloor(frame:Framebuffer, game:Game):Void {
@@ -43,12 +62,15 @@ class RendererRayCastingTextured {
     g2.end();
   }
 
-  function renderWalls(frame:Framebuffer, game:Game):Void {
+  function renderWalls(frame:Framebuffer, game:Game):ZBuffer {
     final g1 = frame.g1;
     g1.begin();
 
     final w = frame.width;
     final h = frame.height;
+
+    // 1D Z buffer
+    var zBuffer = new ZBuffer(frame.height);
 
     for (x in 0...w) {
       // Calculate ray position and direction
@@ -156,6 +178,94 @@ class RendererRayCastingTextured {
           color = Color.fromBytes(Std.int(color.Rb * tint), Std.int(color.Gb * tint), Std.int(color.Bb * tint));
         }
         g1.setPixel(x, y, color);
+      }
+
+      // Set the Z buffer for the sprite casting
+      zBuffer[x] = perpWallDist;
+    }
+
+    g1.end();
+
+    return zBuffer;
+  }
+
+  function renderSprites(frame:Framebuffer, game:Game, zBuffer:ZBuffer):Void {
+    final g1 = frame.g1;
+    g1.begin();
+
+    final w = frame.width;
+    final h = frame.height;
+
+    // Sort sprites from far to close
+    var n = game.sprites.length;
+    var zSprites = new Vector<ZSprite>(n);
+    for (i in 0...n) {
+      zSprites[i] = {
+        index: i,
+        distance: ((game.posX - game.sprites[i].x) * (game.posX - game.sprites[i].x) + (game.posY - game.sprites[i].y) * (game.posY - game.sprites[i].y)),
+      };
+    }
+    zSprites.sort(function(a:ZSprite, b:ZSprite):Int {
+      if (a.distance == b.distance) return 0;
+      return (a.distance > b.distance) ? -1 : 1;
+    });
+
+    final scaleX = SPRWIDTH / TEXWIDTH;
+    final scaleY = SPRHEIGHT / TEXHEIGHT;
+
+    // After sorting the sprites, do the projection and draw them
+    for (i in 0...n) {
+      // Translate sprite position to relative to camera
+      var spriteX = game.sprites[zSprites[i].index].x - game.posX;
+      var spriteY = game.sprites[zSprites[i].index].y - game.posY;
+
+      // Transform sprite with the inverse camera matrix
+      // [ planeX   dirX ] -1                                       [ dirY      -dirX ]
+      // [               ]       =  1/(planeX*dirY-dirX*planeY) *   [                 ]
+      // [ planeY   dirY ]                                          [ -planeY  planeX ]
+
+      var invDet = 1.0 / (game.planeX * game.dirY - game.dirX * game.planeY); // Required for correct matrix multiplication
+
+      var transformX = invDet * (game.dirY * spriteX - game.dirX * spriteY);
+      var transformY = invDet * (-game.planeY * spriteX + game.planeX * spriteY); // This is actually the depth inside the screen, that what Z is in 3D
+
+      var spriteScreenX = Std.int((w / 2) * (1 + transformX / transformY));
+
+      // Calculate height of the sprite on screen
+      var spriteHeight = Math.abs(Std.int(h / (transformY))); // Using 'transformY' instead of the real distance prevents fisheye
+      spriteHeight *= scaleY;
+      // Calculate lowest and highest pixel to fill in current stripe
+      var drawStartY = Std.int(-spriteHeight / 2 + h / 2);
+      if (drawStartY < 0) drawStartY = 0;
+      var drawEndY = Std.int(spriteHeight / 2 + h / 2);
+      if (drawEndY >= h) drawEndY = h - 1;
+
+      // Calculate width of the sprite
+      var spriteWidth = Math.abs(Std.int(h / (transformY)));
+      spriteWidth *= scaleX;
+      var drawStartX = Std.int(-spriteWidth / 2 + spriteScreenX);
+      if (drawStartX < 0) drawStartX = 0;
+      var drawEndX = Std.int(spriteWidth / 2 + spriteScreenX);
+      if (drawEndX >= w) drawEndX = w - 1;
+
+      // Loop through every vertical stripe of the sprite on screen
+      for (stripe in drawStartX...drawEndX) {
+        var texX = Std.int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * (SPRWIDTH / spriteWidth) / 256);
+        // The conditions in the if are:
+        // 1) it's in front of camera plane so you don't see things behind you
+        // 2) it's on the screen (left)
+        // 3) it's on the screen (right)
+        // 4) ZBuffer, with perpendicular distance
+        if (transformY > 0 && stripe > 0 && stripe < w && transformY < zBuffer[stripe]) {
+          for (y in drawStartY...drawEndY) {
+            // For every pixel of the current stripe
+            var d = Std.int(y * 256 - h * 128 + spriteHeight * 128); // 256 and 128 factors to avoid floats
+            var texY = Std.int(((d * SPRHEIGHT) / spriteHeight) / 256);
+            var sprite = sprites[game.sprites[zSprites[i].index].tex];
+            var color = sprite.at(texX, texY);
+            g1.setPixel(stripe, y, color);
+          }
+        }
       }
     }
 

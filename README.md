@@ -31,3 +31,4 @@ node Kha/make --server
 * [Lode](https://lodev.org/) for the [ray-casting tutorial](https://lodev.org/cgtutor/raycasting.html).
 * [Sébastien "deepnight" Bénard](https://deepnight.net/) for [LDtk](https://ldtk.io).
 * [KronBits](https://kronbits.itch.io/) for the [Inca assets](https://kronbits.itch.io/inca-game-assets).
+* [Henry Software](https://henrysoftware.itch.io/) for the [Food assets](https://henrysoftware.itch.io/pixel-food).
