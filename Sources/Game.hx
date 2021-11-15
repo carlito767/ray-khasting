@@ -2,19 +2,12 @@ import kha.Assets;
 import kha.Color;
 import kha.Framebuffer;
 import kha.Scheduler;
-import kha.System;
 import kha.input.Keyboard;
 import kha.input.KeyCode;
 
 import assets.World;
-import tools.Scaling;
-using tools.Graphics2Extension;
 
 class Game {
-  // Resolution
-  final WIDTH = System.windowWidth();
-  final HEIGHT = System.windowHeight();
-
   // Map
   public var map:Array<Array<Cell>>;
 
@@ -200,8 +193,6 @@ class Game {
 
   @:allow(Main.main)
   function render(frame:Framebuffer):Void {
-    Scaling.set(WIDTH, HEIGHT, frame.width, frame.height);
-
     // Render level
     if (showMap) {
       renderer2DMap.render(frame, this);
