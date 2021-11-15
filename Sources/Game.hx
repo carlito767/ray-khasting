@@ -1,3 +1,5 @@
+import kha.Assets;
+import kha.Color;
 import kha.Framebuffer;
 import kha.Scheduler;
 import kha.System;
@@ -46,6 +48,8 @@ class Game {
 
   var showMap:Bool;
   var showTextures:Bool;
+
+  var showHelp:Bool;
 
   // World
   var world:World;
@@ -125,6 +129,7 @@ class Game {
       case L: toNextLevel = true;
       case M: showMap = !showMap;
       case T: showTextures = !showTextures;
+      case H: showHelp = !showHelp;
       default:
     }
   }
@@ -207,5 +212,24 @@ class Game {
     else {
       rendererRayCastingFlat.render(frame, this);
     }
+
+    // Show help
+    final g2 = frame.g2;
+    g2.begin(false);
+
+    g2.color = Color.White;
+    g2.font = Assets.fonts.OpenSans;
+    g2.fontSize = 30;
+    if (showHelp) {
+      var padding = g2.fontSize + 5;
+      g2.drawString('L: next level', 0, 0);
+      g2.drawString('M: toggle 2D map', 0, padding);
+      g2.drawString('T: toggle textures', 0, padding * 2);
+    }
+    else {
+      g2.drawString('H: help', 0, 0);
+    }
+
+    g2.end();
   }
 }
