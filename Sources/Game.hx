@@ -24,8 +24,13 @@ class Game {
   public var dirX:Float;
   public var dirY:Float;
 
+  // Camera plane
+  public var planeX:Float;
+  public var planeY:Float;
+
   // Renderers
   var renderer2DMap:Renderer2DMap;
+  var rendererRayCastingFlat:RendererRayCastingFlat;
 
   // Commands
   var up:Bool;
@@ -34,6 +39,8 @@ class Game {
   var right:Bool;
 
   var toNextLevel:Bool;
+
+  var showMap:Bool;
 
   // World
   var world:World;
@@ -50,6 +57,7 @@ class Game {
 
     // Initialize renderers
     renderer2DMap = new Renderer2DMap();
+    rendererRayCastingFlat = new RendererRayCastingFlat();
 
     // Initialize keyboard
     var keyboard = Keyboard.get();
@@ -77,6 +85,9 @@ class Game {
     posY = hero.cx + hero.pivotX;
     dirX = -1.0;
     dirY = 0.0;
+    // Camera
+    planeX = 0.0;
+    planeY = 0.66;
   }
 
   function loadNextLevel():Void {
@@ -95,6 +106,7 @@ class Game {
       case Left: left = true;
       case Right: right = true;
       case L: toNextLevel = true;
+      case M: showMap = !showMap;
       default:
     }
   }
@@ -143,15 +155,23 @@ class Game {
     }
     // Rotate to the left
     if (left) {
+      // Both camera direction and camera plane must be rotated
       var oldDirX = dirX;
       dirX = dirX * Math.cos(rotSpeed) - dirY * Math.sin(rotSpeed);
       dirY = oldDirX * Math.sin(rotSpeed) + dirY * Math.cos(rotSpeed);
+      var oldPlaneX = planeX;
+      planeX = planeX * Math.cos(rotSpeed) - planeY * Math.sin(rotSpeed);
+      planeY = oldPlaneX * Math.sin(rotSpeed) + planeY * Math.cos(rotSpeed);
     }
     // Rotate to the right
     if (right) {
+      // Both camera direction and camera plane must be rotated
       var oldDirX = dirX;
       dirX = dirX * Math.cos(-rotSpeed) - dirY * Math.sin(-rotSpeed);
       dirY = oldDirX * Math.sin(-rotSpeed) + dirY * Math.cos(-rotSpeed);
+      var oldPlaneX = planeX;
+      planeX = planeX * Math.cos(-rotSpeed) - planeY * Math.sin(-rotSpeed);
+      planeY = oldPlaneX * Math.sin(-rotSpeed) + planeY * Math.cos(-rotSpeed);
     }
   }
 
@@ -160,6 +180,11 @@ class Game {
     Scaling.set(WIDTH, HEIGHT, frame.width, frame.height);
 
     // Render level
-    renderer2DMap.render(frame, this);
+    if (showMap) {
+      renderer2DMap.render(frame, this);
+    }
+    else {
+      rendererRayCastingFlat.render(frame, this);
+    }
   }
 }
