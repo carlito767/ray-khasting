@@ -28,4 +28,5 @@ node Kha/make --server
 * Launch a web browser at this address: http://localhost:8080/
 
 ## Credits
+* [Lode](https://lodev.org/) for the [ray-casting tutorial](https://lodev.org/cgtutor/raycasting.html).
 * [Sébastien "deepnight" Bénard](https://deepnight.net/) for [LDtk](https://ldtk.io).
