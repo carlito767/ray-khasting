@@ -1,6 +1,6 @@
 # ray-khasting
 
-Template for [Kha](http://kha.tech/) games.
+Ray-casting with [Kha](http://kha.tech/).
 
 https://gamedevplayground.github.io/ray-khasting/
 
