@@ -2,14 +2,14 @@
 
 Ray-casting with [Kha](http://kha.tech/).
 
-https://gamedevplayground.github.io/ray-khasting/
+https://carlito767.github.io/ray-khasting/
 
 ## How to run
 
 * Clone this repository:
 
 ```
-git clone --recursive https://github.com/gamedevplayground/ray-khasting.git
+git clone --recursive https://github.com/carlito767/ray-khasting.git
 ```
 
 * Install [Node.js](https://nodejs.org/) (minimum version: 8.9) and add it to PATH
